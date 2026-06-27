@@ -411,25 +411,39 @@ async function handleApi(req, res, url) {
 async function serveStatic(req, res, url) {
   const requested = decodeURIComponent(url.pathname === "/" ? "/index.html" : url.pathname);
   const safePath = path.normalize(requested).replace(/^(\.\.[/\\])+/, "");
-  const filePath = path.join(PUBLIC_DIR, safePath);
-  if (!filePath.startsWith(PUBLIC_DIR)) return send(res, 403, "Forbidden");
-  try {
-    const data = await fs.readFile(filePath);
-    const ext = path.extname(filePath).toLowerCase();
-    const type = {
-      ".html": "text/html; charset=utf-8",
-      ".js": "application/javascript; charset=utf-8",
-      ".css": "text/css; charset=utf-8",
-      ".png": "image/png",
-      ".jpg": "image/jpeg",
-      ".jpeg": "image/jpeg",
-      ".svg": "image/svg+xml",
-    }[ext] || "application/octet-stream";
-    res.writeHead(200, { "content-type": type });
-    res.end(data);
-  } catch {
-    send(res, 404, "Not found");
+
+  const candidates = [path.join(PUBLIC_DIR, safePath)];
+  if (safePath === "index.html") {
+    candidates.push(path.join(__dirname, "index.html"));
   }
+
+  for (const filePath of candidates) {
+    const allowed =
+      filePath.startsWith(PUBLIC_DIR) ||
+      (safePath === "index.html" && filePath === path.join(__dirname, "index.html"));
+    if (!allowed) return send(res, 403, "Forbidden");
+
+    try {
+      const data = await fs.readFile(filePath);
+      const ext = path.extname(filePath).toLowerCase();
+      const type = {
+        ".html": "text/html; charset=utf-8",
+        ".js": "application/javascript; charset=utf-8",
+        ".css": "text/css; charset=utf-8",
+        ".png": "image/png",
+        ".jpg": "image/jpeg",
+        ".jpeg": "image/jpeg",
+        ".svg": "image/svg+xml",
+      }[ext] || "application/octet-stream";
+      res.writeHead(200, { "content-type": type });
+      res.end(data);
+      return;
+    } catch {
+      // Try the next safe candidate.
+    }
+  }
+
+  send(res, 404, "Not found");
 }
 
 await ensureData();
