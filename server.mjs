@@ -7,7 +7,7 @@ import zlib from "node:zlib";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PORT = Number(process.env.PORT || 3000);
-const APP_VERSION = "quote-online-20260627-embedded-index";
+const APP_VERSION = "quote-online-20260627-embedded-index-path-fix";
 const APP_PASSWORD = process.env.APP_PASSWORD || "quote123";
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || APP_PASSWORD;
 const DATA_DIR = process.env.DATA_DIR || path.join(__dirname, "data");
@@ -1086,7 +1086,10 @@ async function handleApi(req, res, url) {
 
 async function serveStatic(req, res, url) {
   const requested = decodeURIComponent(url.pathname === "/" ? "/index.html" : url.pathname);
-  const safePath = path.normalize(requested).replace(/^(\.\.[/\\])+/, "");
+  const safePath = path
+    .normalize(requested)
+    .replace(/^[/\\]+/, "")
+    .replace(/^(\.\.[/\\])+/, "");
 
   const candidates = [path.join(PUBLIC_DIR, safePath)];
   if (safePath === "index.html") {
