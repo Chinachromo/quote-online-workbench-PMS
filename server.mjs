@@ -7,6 +7,7 @@ import zlib from "node:zlib";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PORT = Number(process.env.PORT || 3000);
+const APP_VERSION = "quote-online-20260627-root-index-check";
 const APP_PASSWORD = process.env.APP_PASSWORD || "quote123";
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || APP_PASSWORD;
 const DATA_DIR = process.env.DATA_DIR || path.join(__dirname, "data");
@@ -341,7 +342,17 @@ async function handleApi(req, res, url) {
     return sendJson(res, 401, { error: "访问口令不正确" });
   }
 
-  if (url.pathname === "/api/health") return sendJson(res, 200, { ok: true });
+  if (url.pathname === "/api/health") {
+    return sendJson(res, 200, {
+      ok: true,
+      version: APP_VERSION,
+      files: {
+        rootIndex: fssync.existsSync(path.join(__dirname, "index.html")),
+        publicIndex: fssync.existsSync(path.join(PUBLIC_DIR, "index.html")),
+        server: fssync.existsSync(path.join(__dirname, "server.mjs")),
+      },
+    });
+  }
   if (!requireAuth(req, res)) return;
 
   if (url.pathname === "/api/quote-number" && req.method === "POST") {
@@ -443,7 +454,7 @@ async function serveStatic(req, res, url) {
     }
   }
 
-  send(res, 404, "Not found");
+  send(res, 404, `首页文件没有找到。版本：${APP_VERSION}。请确认 GitHub 仓库根目录有 index.html，或有 public/index.html。`);
 }
 
 await ensureData();
