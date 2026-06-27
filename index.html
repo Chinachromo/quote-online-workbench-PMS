@@ -1,0 +1,1314 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>报价单工作台</title>
+  <style>
+    :root {
+      --ink: #1f2933;
+      --muted: #64748b;
+      --line: #d8e0ea;
+      --soft: #f6f8fb;
+      --paper: #ffffff;
+      --accent: #0f766e;
+      --accent-2: #9f1239;
+      --warn: #b45309;
+      --fill: #fff7ed;
+      --shadow: 0 18px 50px rgba(21, 35, 52, 0.11);
+      font-family: Arial, "PingFang SC", "Microsoft YaHei", sans-serif;
+      color: var(--ink);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: #eef3f7;
+      color: var(--ink);
+    }
+
+    button,
+    input,
+    select,
+    textarea {
+      font: inherit;
+    }
+
+    button {
+      border: 1px solid transparent;
+      border-radius: 7px;
+      padding: 9px 13px;
+      background: var(--accent);
+      color: #fff;
+      cursor: pointer;
+      font-weight: 700;
+    }
+
+    button.secondary {
+      background: #fff;
+      color: var(--ink);
+      border-color: var(--line);
+    }
+
+    button.danger {
+      background: #fff;
+      color: var(--accent-2);
+      border-color: #f3c4cf;
+    }
+
+    button.icon {
+      width: 34px;
+      height: 34px;
+      padding: 0;
+      display: inline-grid;
+      place-items: center;
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 8px 10px;
+      color: var(--ink);
+      background: #fff;
+      min-width: 0;
+    }
+
+    input[readonly] {
+      background: #f8fafc;
+      color: var(--muted);
+    }
+
+    label {
+      display: grid;
+      gap: 5px;
+      font-size: 12px;
+      font-weight: 700;
+      color: #4b5f75;
+    }
+
+    .appHeader {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      padding: 18px 22px;
+      background: #fff;
+      border-bottom: 1px solid var(--line);
+      position: sticky;
+      top: 0;
+      z-index: 4;
+    }
+
+    .titleBlock h1 {
+      margin: 0;
+      font-size: 24px;
+      line-height: 1.2;
+    }
+
+    .titleBlock p {
+      margin: 5px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .statusPill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid #a8d8cc;
+      color: #075e56;
+      background: #ecfdf5;
+      border-radius: 7px;
+      padding: 8px 11px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .workspace {
+      display: grid;
+      grid-template-columns: minmax(420px, 0.92fr) minmax(520px, 1.08fr);
+      gap: 16px;
+      padding: 16px;
+      max-width: 1500px;
+      margin: 0 auto;
+    }
+
+    .panel {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      min-width: 0;
+      overflow: hidden;
+    }
+
+    .panelHeader {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      background: #fbfdff;
+    }
+
+    .panelHeader h2 {
+      margin: 0;
+      font-size: 17px;
+    }
+
+    .panelBody {
+      padding: 16px;
+      display: grid;
+      gap: 18px;
+    }
+
+    .section {
+      display: grid;
+      gap: 11px;
+    }
+
+    .sectionTitle {
+      font-size: 13px;
+      color: var(--accent-2);
+      font-weight: 900;
+      letter-spacing: 0;
+    }
+
+    .noteBox {
+      border: 1px solid #f1d0a7;
+      background: #fff7ed;
+      color: #7c3f08;
+      border-radius: 7px;
+      padding: 10px 12px;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .grid2,
+    .grid3,
+    .grid4 {
+      display: grid;
+      gap: 10px;
+    }
+
+    .grid2 {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .grid3 {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .grid4 {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .lineItems {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+      font-size: 13px;
+    }
+
+    .lineItems th,
+    .lineItems td {
+      border-bottom: 1px solid var(--line);
+      padding: 8px 6px;
+      vertical-align: top;
+    }
+
+    .lineItems th {
+      color: #52677c;
+      text-align: left;
+      background: #f8fafc;
+      font-size: 12px;
+    }
+
+    .lineItems th:nth-child(1) { width: 14%; }
+    .lineItems th:nth-child(2) { width: 8%; }
+    .lineItems th:nth-child(3) { width: 24%; }
+    .lineItems th:nth-child(4) { width: 13%; }
+    .lineItems th:nth-child(5) { width: 14%; }
+    .lineItems th:nth-child(6) { width: 13%; }
+    .lineItems th:nth-child(7) { width: 12%; }
+    .lineItems th:nth-child(8) { width: 44px; }
+
+    .money {
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .toolbarRow {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .totalBar {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 16px;
+      padding: 12px 0 0;
+      font-weight: 900;
+      color: var(--ink);
+    }
+
+    .totalBar strong {
+      color: var(--accent-2);
+      font-size: 20px;
+    }
+
+    .catalogTable {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+      font-size: 12px;
+    }
+
+    .catalogTable th,
+    .catalogTable td {
+      border: 1px solid #e6edf5;
+      padding: 7px;
+      text-align: left;
+    }
+
+    .catalogTable th {
+      background: #f8fafc;
+      color: #52677c;
+    }
+
+    .sealControls {
+      display: grid;
+      grid-template-columns: 150px minmax(220px, 1fr);
+      gap: 12px;
+      align-items: end;
+    }
+
+    .checkLabel {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: var(--ink);
+      font-weight: 800;
+    }
+
+    .checkLabel input {
+      width: auto;
+    }
+
+    .sealPreviewSmall {
+      width: 92px;
+      height: 92px;
+      border: 1px dashed #e11d48;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      color: #be123c;
+      font-size: 12px;
+      text-align: center;
+      overflow: hidden;
+      background: #fff;
+    }
+
+    .sealPreviewSmall img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+    }
+
+    .previewShell {
+      background: #f2f5f8;
+      padding: 18px;
+      overflow: auto;
+    }
+
+    .previewPane {
+      width: min(100%, 920px);
+      min-height: 980px;
+      margin: 0 auto;
+      background: #fff;
+      border: 1px solid #cfd7e2;
+      box-shadow: 0 14px 35px rgba(32, 43, 58, 0.13);
+      padding: 42px 44px;
+      color: #111827;
+    }
+
+    .quoteTop {
+      display: grid;
+      grid-template-columns: 1fr 300px;
+      gap: 24px;
+      align-items: start;
+    }
+
+    .quoteTop h2 {
+      margin: 0;
+      text-align: center;
+      grid-column: 1 / -1;
+      font-size: 26px;
+      letter-spacing: 0;
+    }
+
+    .quoteSubtitle {
+      grid-column: 1 / -1;
+      margin-top: -18px;
+      text-align: center;
+      font-size: 18px;
+      font-weight: 900;
+      letter-spacing: 0;
+    }
+
+    .quoteMeta {
+      display: grid;
+      gap: 7px;
+      font-size: 13px;
+      line-height: 1.45;
+      justify-self: end;
+      width: 100%;
+    }
+
+    .quoteMeta div {
+      border-bottom: 1px solid #c8d1dc;
+      padding-bottom: 3px;
+    }
+
+    .partyGrid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-top: 26px;
+      font-size: 13px;
+    }
+
+    .quotedByBlock {
+      position: relative;
+      min-height: 118px;
+    }
+
+    .partyGrid h3 {
+      font-size: 13px;
+      margin: 0 0 8px;
+      color: #334155;
+      border-bottom: 1px solid #c8d1dc;
+      padding-bottom: 5px;
+    }
+
+    .partyGrid p {
+      margin: 4px 0;
+      min-height: 18px;
+    }
+
+    .partyMainName {
+      min-height: 21px;
+      font-weight: 800;
+      color: #111827;
+    }
+
+    .quoteTable {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 28px;
+      font-size: 12px;
+      table-layout: fixed;
+    }
+
+    .quoteTable th,
+    .quoteTable td {
+      border: 1px solid #aeb9c7;
+      padding: 7px 7px;
+      vertical-align: top;
+    }
+
+    .quoteTable th {
+      background: #f1f5f9;
+      text-align: center;
+      color: #1f2937;
+    }
+
+    .quoteTable .idx { width: 8%; text-align: center; }
+    .quoteTable .qty { width: 10%; text-align: center; }
+    .quoteTable .code { width: 17%; }
+    .quoteTable .desc { width: 34%; }
+    .quoteTable .price { width: 15%; text-align: right; }
+    .quoteTable .rowTotal { width: 16%; text-align: right; }
+
+    .quoteTotal {
+      text-align: right;
+      font-weight: 900;
+      font-size: 14px;
+    }
+
+    .terms {
+      margin-top: 16px;
+      border-top: 1px solid #c8d1dc;
+      padding-top: 10px;
+      font-size: 12px;
+      line-height: 1.6;
+    }
+
+    .sealArea {
+      display: flex;
+      position: absolute;
+      left: 92px;
+      top: 8px;
+      width: 124px;
+      height: 124px;
+      justify-content: center;
+      align-items: center;
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    .quoteSeal {
+      width: 118px;
+      height: 118px;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      color: #be123c;
+      font-size: 13px;
+      font-weight: 900;
+      line-height: 1.35;
+    }
+
+    .quoteSeal.placeholder {
+      border: 2px solid #e11d48;
+      border-radius: 50%;
+      padding: 18px;
+      transform: rotate(-10deg);
+      opacity: 0.76;
+    }
+
+    .quoteSeal img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+      transform: rotate(-8deg);
+      opacity: 0.92;
+    }
+
+    .muted {
+      color: var(--muted);
+    }
+
+    .emptyHint {
+      color: #8a99aa;
+      font-style: italic;
+    }
+
+    @media (max-width: 1120px) {
+      .workspace {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 760px) {
+      .appHeader,
+      .quoteTop,
+      .partyGrid,
+      .grid2,
+      .grid3,
+      .grid4 {
+        grid-template-columns: 1fr;
+      }
+
+      .appHeader {
+        display: grid;
+      }
+
+      .actions {
+        justify-content: flex-start;
+      }
+
+      .lineItems {
+        min-width: 760px;
+      }
+
+      .sectionScroll {
+        overflow-x: auto;
+      }
+
+      .previewPane {
+        padding: 28px 22px;
+        min-width: 720px;
+      }
+    }
+
+    @media print {
+      body {
+        background: #fff;
+      }
+
+      body * {
+        visibility: hidden;
+      }
+
+      .previewPane,
+      .previewPane * {
+        visibility: visible;
+      }
+
+      .previewPane {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        min-height: auto;
+        border: 0;
+        box-shadow: none;
+        padding: 28px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="appHeader">
+    <div class="titleBlock">
+      <h1>报价单工作台</h1>
+      <p>心擎医疗模板 · 已读取本地内部价格表</p>
+    </div>
+    <div class="actions">
+      <span class="statusPill" id="quoteNoPill"></span>
+      <button type="button" class="secondary" id="newQuoteBtn">＋ 新报价</button>
+      <button type="button" class="secondary" id="saveDraftBtn">保存草稿</button>
+      <button type="button" id="printBtn">打印 / PDF</button>
+    </div>
+  </header>
+
+  <main class="workspace">
+    <section class="panel">
+      <div class="panelHeader">
+        <h2>报价录入</h2>
+        <span class="muted" id="saveState">未保存</span>
+      </div>
+      <div class="panelBody">
+        <div class="section">
+          <div class="sectionTitle">基本信息</div>
+          <div class="grid4">
+            <label>报价单号
+              <input id="quoteNo" readonly>
+            </label>
+            <label>报价日期
+              <input id="quoteDate" readonly>
+            </label>
+            <label>有效期
+              <select id="validDays">
+                <option value="15">15天</option>
+                <option value="30" selected>30天</option>
+                <option value="60">60天</option>
+                <option value="90">90天</option>
+              </select>
+            </label>
+            <label>报价人
+              <input id="salesName" value="陈伟伟">
+            </label>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="sectionTitle">客户信息</div>
+          <div class="grid2">
+            <label>公司 / 医院
+              <input id="customerCompany" placeholder="客户单位">
+            </label>
+            <label>联系人
+              <input id="customerName" placeholder="联系人">
+            </label>
+            <label>电话
+              <input id="customerTel" placeholder="电话">
+            </label>
+            <label>邮箱
+              <input id="customerMail" placeholder="邮箱">
+            </label>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="toolbarRow">
+            <div class="sectionTitle">产品明细</div>
+            <button type="button" class="secondary" id="addLineBtn">＋ 添加产品</button>
+          </div>
+          <div class="sectionScroll">
+            <table class="lineItems">
+              <thead>
+                <tr>
+                  <th>货号</th>
+                  <th>数量</th>
+                  <th>产品描述</th>
+                  <th>包装规格</th>
+                  <th>价格选择</th>
+                  <th>报价单价</th>
+                  <th>小计</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="linesBody"></tbody>
+            </table>
+          </div>
+          <div class="totalBar">
+            <span>合计</span>
+            <strong id="grandTotal">¥0</strong>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="sectionTitle">备注</div>
+          <textarea id="terms" rows="3" placeholder="填写本次报价需要说明的内容，例如含税、货期、原产国、付款方式等。">1.本报价为人民币价格包含13%增值税发票        2. 货期：2-3周   3.原产国：美国 4.付款方式：100%预付</textarea>
+        </div>
+
+        <div class="section">
+          <div class="sectionTitle">电子章</div>
+          <div class="noteBox">电子章只使用你上传的图片。没有上传图片时，最终报价单不显示电子章。</div>
+          <div class="sealControls">
+            <label class="checkLabel">
+              <input type="checkbox" id="sealEnabled" checked>
+              显示电子章
+            </label>
+            <label>上传电子章图片
+              <input id="sealUpload" type="file" accept="image/*">
+            </label>
+            <div class="sealPreviewSmall" id="sealThumb">未上传<br>电子章</div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="sectionTitle">内部价格表</div>
+          <div class="noteBox">当前已经读取本地内部价格表。输入货号后自动带出产品名字、品牌、包装规格和单位；每行可选择经销商价格、终端价格或特价，选择特价时由你手写输入。</div>
+          <div class="sealControls">
+            <label>管理员口令
+              <input id="adminCode" type="password" placeholder="上传价格表时填写">
+            </label>
+            <label>上传洁融产品价格表 Excel
+              <input id="productUpload" type="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">
+            </label>
+            <button type="button" class="secondary" id="uploadProductsBtn">上传并更新价格表</button>
+            <span class="muted" id="productUploadStatus"></span>
+          </div>
+          <div class="sectionScroll">
+            <table class="catalogTable">
+              <thead>
+                <tr>
+                  <th>分类</th>
+                  <th>产品名字</th>
+                  <th>品牌</th>
+                  <th>货号</th>
+                  <th>单位</th>
+                  <th>经销商价</th>
+                  <th>终端价</th>
+                  <th>包装规格</th>
+                </tr>
+              </thead>
+              <tbody id="catalogBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel previewShell">
+      <article class="previewPane" id="quotePreview">
+        <div class="quoteTop">
+          <h2>QUOTATION</h2>
+          <div class="quoteSubtitle">报价单</div>
+          <div></div>
+          <div class="quoteMeta">
+            <div><strong>报价单号 / Reference No：</strong><span data-preview="quoteNo"></span></div>
+            <div><strong>报价日期 / Date：</strong><span data-preview="quoteDate"></span></div>
+            <div><strong>有效期 / Valid date：</strong><span data-preview="validDays"></span>天</div>
+          </div>
+        </div>
+
+        <div class="partyGrid">
+          <section>
+            <h3>Quoted to:</h3>
+            <p class="partyMainName"><span data-preview="customerCompany"></span></p>
+            <p><strong>Name:</strong> <span data-preview="customerName"></span></p>
+            <p><strong>TEL:</strong> <span data-preview="customerTel"></span></p>
+            <p><strong>Mail:</strong> <span data-preview="customerMail"></span></p>
+          </section>
+          <section class="quotedByBlock">
+            <h3>Quoted by:</h3>
+            <p class="partyMainName">诺杰国际贸易（上海）有限公司</p>
+            <div class="sealArea" id="sealArea">
+              <div class="quoteSeal placeholder" id="quoteSeal"></div>
+            </div>
+            <p><strong>From:</strong> <span data-preview="salesName"></span></p>
+            <p><strong>TEL:</strong> <span id="salesTelPreview"></span></p>
+            <p><strong>Mail:</strong> <span id="salesMailPreview"></span></p>
+          </section>
+        </div>
+
+        <table class="quoteTable">
+          <thead>
+            <tr>
+              <th class="idx">ITEM<br>序号</th>
+              <th class="qty">QTY<br>数量</th>
+              <th class="code">Stock Code<br>货号</th>
+              <th class="desc">Product Description<br>产品描述</th>
+              <th class="price">UNIT PRICE<br>(RMB)</th>
+              <th class="rowTotal">TOTAL<br>(RMB)</th>
+            </tr>
+          </thead>
+          <tbody id="previewLines"></tbody>
+          <tfoot>
+            <tr>
+              <td colspan="4"></td>
+              <td class="quoteTotal">合计</td>
+              <td class="quoteTotal" id="previewGrandTotal">¥0</td>
+            </tr>
+          </tfoot>
+        </table>
+
+        <div class="terms"><strong>备注：</strong><span id="termsPreview"></span></div>
+      </article>
+    </section>
+  </main>
+
+  <datalist id="catalogCodes"></datalist>
+
+  <script>
+    let catalog = [];
+    const DRAFT_KEY = "quote-online-draft-v1";
+    const ACCESS_KEY = "quote-online-access-code";
+
+    let lines = [];
+    let accessCode = localStorage.getItem(ACCESS_KEY) || "";
+    let sealImageData = "";
+    const money = new Intl.NumberFormat("zh-CN", {
+      style: "currency",
+      currency: "CNY",
+      maximumFractionDigits: 2
+    });
+
+    const ids = [
+      "quoteNo",
+      "quoteDate",
+      "validDays",
+      "salesName",
+      "customerCompany",
+      "customerName",
+      "customerTel",
+      "customerMail",
+      "terms",
+      "sealEnabled"
+    ];
+
+    const fields = Object.fromEntries(ids.map((id) => [id, document.getElementById(id)]));
+    const linesBody = document.getElementById("linesBody");
+    const previewLines = document.getElementById("previewLines");
+    const quoteNoPill = document.getElementById("quoteNoPill");
+    const saveState = document.getElementById("saveState");
+
+    async function api(path, options = {}) {
+      const headers = {
+        ...(options.headers || {}),
+        "x-access-code": accessCode
+      };
+      if (options.json) {
+        headers["content-type"] = "application/json";
+        options.body = JSON.stringify(options.json);
+      }
+      const response = await fetch(path, { ...options, headers });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.error || "服务器请求失败");
+      return data;
+    }
+
+    async function ensureLogin() {
+      while (!accessCode) {
+        const input = window.prompt("请输入报价工作台访问口令");
+        if (input == null) throw new Error("未输入访问口令");
+        accessCode = input.trim();
+      }
+      try {
+        await api("/api/login", { method: "POST", json: { password: accessCode } });
+        localStorage.setItem(ACCESS_KEY, accessCode);
+      } catch (error) {
+        localStorage.removeItem(ACCESS_KEY);
+        accessCode = "";
+        window.alert(error.message);
+        return ensureLogin();
+      }
+    }
+
+    async function loadServerSeal() {
+      const data = await api("/api/seal");
+      sealImageData = data.sealImageData || "";
+    }
+
+    function compactDate(date = new Date()) {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const day = String(date.getDate()).padStart(2, "0");
+      return `${year}${month}${day}`;
+    }
+
+    async function issueQuoteNo() {
+      try {
+        return await api("/api/quote-number", { method: "POST" });
+      } catch {
+        const today = compactDate();
+        return { quoteNo: `PMS${today}001`, date: today };
+      }
+    }
+
+    function blankLine() {
+      return {
+        code: "",
+        qty: "",
+        description: "",
+        category: "",
+        brand: "",
+        pack: "",
+        unit: "",
+        dealerPrice: 0,
+        temporaryDealerPrice: 0,
+        suggestedPrice: 0,
+        moq: "",
+        recommendedQty: "",
+        priceMode: "dealer",
+        standardPrice: 0,
+        quotePrice: ""
+      };
+    }
+
+    function cacheProduct(product) {
+      const index = catalog.findIndex((item) => item.code === product.code);
+      if (index >= 0) catalog[index] = product;
+      else catalog.unshift(product);
+      catalog = catalog.slice(0, 20);
+      renderCatalog();
+    }
+
+    async function fillProduct(index, code) {
+      const query = String(code || "").trim();
+      lines[index].code = code;
+      if (!query) {
+        renderQuoteOutput();
+        return;
+      }
+      let product = null;
+      try {
+        const data = await api(`/api/products/${encodeURIComponent(query)}`);
+        product = data.product;
+      } catch {
+        renderQuoteOutput();
+        return;
+      }
+      if (product) {
+        cacheProduct(product);
+        const priceMode = lines[index].priceMode || "dealer";
+        const existingQuotePrice = lines[index].quotePrice;
+        lines[index] = {
+          ...lines[index],
+          code: product.code,
+          description: product.description,
+          category: product.category || "",
+          brand: product.brand || "",
+          english: product.english,
+          pack: product.pack,
+          unit: product.unit,
+          dealerPrice: product.dealerPrice || 0,
+          temporaryDealerPrice: product.temporaryDealerPrice || 0,
+          suggestedPrice: product.suggestedPrice || 0,
+          moq: product.moq || "",
+          recommendedQty: product.recommendedQty || "",
+          priceMode,
+          standardPrice: product.standardPrice,
+          quotePrice: priceMode === "special" ? (existingQuotePrice === undefined ? "" : existingQuotePrice) : priceForMode(product, priceMode)
+        };
+        render();
+        return;
+      }
+      renderQuoteOutput();
+    }
+
+    function priceForMode(line, mode = line.priceMode || "dealer") {
+      if (mode === "terminal") return Number(line.suggestedPrice || 0);
+      if (mode === "special") return Number(line.quotePrice || 0);
+      return Number(line.dealerPrice || 0);
+    }
+
+    function lineTotal(line) {
+      return parseAmount(line.qty) * parseAmount(line.quotePrice);
+    }
+
+    function total() {
+      return lines.reduce((sum, line) => sum + lineTotal(line), 0);
+    }
+
+    function parseAmount(value) {
+      const cleaned = String(value ?? "").replace(/[^\d.]/g, "");
+      const number = Number(cleaned);
+      return Number.isFinite(number) ? number : 0;
+    }
+
+    function setField(id, value) {
+      if (fields[id]?.type === "checkbox") {
+        fields[id].checked = value === true || value === "true" || value === "on";
+        return;
+      }
+      fields[id].value = value || "";
+    }
+
+    function field(id) {
+      if (fields[id]?.type === "checkbox") {
+        return fields[id].checked ? "true" : "";
+      }
+      return fields[id].value.trim();
+    }
+
+    function renderCatalog() {
+      document.getElementById("catalogCodes").innerHTML = catalog
+        .map((item) => `<option value="${item.code}"></option>`)
+        .join("");
+
+      document.getElementById("catalogBody").innerHTML = catalog
+        .map((item) => `
+          <tr>
+            <td>${item.category || ""}</td>
+            <td>${item.description || item.name || ""}</td>
+            <td>${item.brand || ""}</td>
+            <td>${item.code}</td>
+            <td>${item.unit}</td>
+            <td class="money">${money.format(Number(item.dealerPrice || 0))}</td>
+            <td class="money">${money.format(Number(item.suggestedPrice || 0))}</td>
+            <td>${item.pack || ""}</td>
+          </tr>
+        `)
+        .join("");
+    }
+
+    function renderLinesEditor() {
+      linesBody.innerHTML = lines
+        .map((line, index) => `
+          <tr>
+            <td>
+              <input list="catalogCodes" value="${line.code}" data-line="${index}" data-field="code" placeholder="货号">
+            </td>
+            <td>
+              <input type="text" inputmode="decimal" value="${line.qty}" data-line="${index}" data-field="qty" placeholder="手输数量">
+            </td>
+            <td>
+              <input value="${line.description || ""}" data-line="${index}" data-field="description" placeholder="产品描述">
+            </td>
+            <td>
+              <input value="${line.pack || ""}" data-line="${index}" data-field="pack" placeholder="包装规格">
+            </td>
+            <td>
+              <select data-line="${index}" data-field="priceMode">
+                <option value="dealer" ${line.priceMode === "dealer" ? "selected" : ""}>经销商价格</option>
+                <option value="terminal" ${line.priceMode === "terminal" ? "selected" : ""}>终端价格</option>
+                <option value="special" ${line.priceMode === "special" ? "selected" : ""}>特价</option>
+              </select>
+            </td>
+            <td>
+              <input type="text" inputmode="decimal" value="${line.quotePrice === "" ? "" : line.quotePrice}" data-line="${index}" data-field="quotePrice" placeholder="${line.priceMode === "special" ? "输入特价" : ""}" ${line.priceMode === "special" ? "" : "readonly"}>
+            </td>
+            <td class="money" data-row-total="${index}">
+              ${money.format(lineTotal(line))}
+            </td>
+            <td>
+              <button type="button" class="danger icon" data-remove="${index}" title="删除">×</button>
+            </td>
+          </tr>
+        `)
+        .join("");
+    }
+
+    function previewDescription(line) {
+      const parts = [
+        line.description,
+        line.brand ? `品牌：${line.brand}` : "",
+        line.pack ? `包装规格：${line.pack}` : "",
+        line.unit ? `单位：${line.unit}` : "",
+        line.moq ? `最小起订量：${line.moq}` : "",
+        line.recommendedQty ? `推荐订货量：${line.recommendedQty}` : ""
+      ];
+      return parts.filter(Boolean).join("<br>");
+    }
+
+    function renderPreviewLines() {
+      const filled = lines.filter((line) => line.code || line.description);
+      if (!filled.length) {
+        previewLines.innerHTML = `
+          <tr>
+            <td class="idx">1</td>
+            <td class="qty"></td>
+            <td class="code"></td>
+            <td class="desc emptyHint">产品明细</td>
+            <td class="price"></td>
+            <td class="rowTotal"></td>
+          </tr>
+        `;
+        return;
+      }
+
+      previewLines.innerHTML = filled
+        .map((line, index) => `
+          <tr>
+            <td class="idx">${index + 1}</td>
+            <td class="qty">${line.qty || ""}</td>
+            <td class="code">${line.code || ""}</td>
+            <td class="desc">${previewDescription(line)}</td>
+            <td class="price">${money.format(Number(line.quotePrice || 0))}</td>
+            <td class="rowTotal">${money.format(lineTotal(line))}</td>
+          </tr>
+        `)
+        .join("");
+    }
+
+    function renderPreviewFields() {
+      document.querySelectorAll("[data-preview]").forEach((node) => {
+        const id = node.dataset.preview;
+        node.textContent = field(id);
+      });
+      document.getElementById("termsPreview").textContent = field("terms");
+      document.getElementById("salesTelPreview").textContent = "";
+      document.getElementById("salesMailPreview").textContent = "";
+      renderSeal();
+    }
+
+    function renderSeal() {
+      const enabled = fields.sealEnabled.checked;
+      const sealArea = document.getElementById("sealArea");
+      const quoteSeal = document.getElementById("quoteSeal");
+      const sealThumb = document.getElementById("sealThumb");
+      sealArea.style.display = enabled ? "flex" : "none";
+      if (sealImageData) {
+        quoteSeal.className = "quoteSeal";
+        quoteSeal.innerHTML = `<img src="${sealImageData}" alt="电子章">`;
+        sealThumb.innerHTML = `<img src="${sealImageData}" alt="电子章预览">`;
+      } else {
+        sealArea.style.display = "none";
+        quoteSeal.className = "quoteSeal";
+        quoteSeal.textContent = "";
+        sealThumb.innerHTML = "未上传<br>电子章";
+      }
+    }
+
+    function render() {
+      renderLinesEditor();
+      renderQuoteOutput();
+    }
+
+    function renderQuoteOutput() {
+      renderPreviewLines();
+      renderPreviewFields();
+      const grand = total();
+      document.getElementById("grandTotal").textContent = money.format(grand);
+      document.getElementById("previewGrandTotal").textContent = money.format(grand);
+      quoteNoPill.textContent = `${field("quoteNo")} ｜ ${field("quoteDate")}`;
+      saveState.textContent = "未保存";
+    }
+
+    function updateEditorRowTotal(index) {
+      const target = linesBody.querySelector(`[data-row-total="${index}"]`);
+      if (target) target.textContent = money.format(lineTotal(lines[index]));
+    }
+
+    function currentDraft() {
+      return {
+        fields: Object.fromEntries(ids.map((id) => [id, fields[id].type === "checkbox" ? fields[id].checked : fields[id].value])),
+        lines,
+        quoteNo: field("quoteNo"),
+        quoteDate: field("quoteDate"),
+        customerCompany: field("customerCompany"),
+        customerName: field("customerName"),
+        total: total()
+      };
+    }
+
+    async function saveQuote() {
+      const draft = currentDraft();
+      localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
+      await api("/api/quotes", { method: "POST", json: draft });
+      saveState.textContent = "已保存";
+    }
+
+    function loadDraft() {
+      const saved = localStorage.getItem(DRAFT_KEY);
+      if (saved) {
+        try {
+          const draft = JSON.parse(saved);
+          ids.forEach((id) => setField(id, draft.fields?.[id]));
+          lines = Array.isArray(draft.lines) && draft.lines.length ? draft.lines : [blankLine()];
+          return true;
+        } catch {
+          return false;
+        }
+      }
+      return false;
+    }
+
+    async function newQuote() {
+      const issued = await issueQuoteNo();
+      setField("quoteNo", issued.quoteNo);
+      setField("quoteDate", issued.date || compactDate());
+      setField("validDays", "30");
+      setField("salesName", "陈伟伟");
+      setField("customerCompany", "");
+      setField("customerName", "");
+      setField("customerTel", "");
+      setField("customerMail", "");
+      setField("terms", "1.本报价为人民币价格包含13%增值税发票        2. 货期：2-3周   3.原产国：美国 4.付款方式：100%预付");
+      fields.sealEnabled.checked = true;
+      lines = [blankLine()];
+      render();
+    }
+
+    document.getElementById("addLineBtn").addEventListener("click", () => {
+      lines.push(blankLine());
+      render();
+    });
+
+    document.getElementById("newQuoteBtn").addEventListener("click", async () => {
+      await newQuote();
+      await saveQuote();
+    });
+
+    document.getElementById("saveDraftBtn").addEventListener("click", async () => {
+      try {
+        await saveQuote();
+      } catch (error) {
+        window.alert(error.message);
+      }
+    });
+
+    document.getElementById("printBtn").addEventListener("click", () => window.print());
+
+    document.getElementById("uploadProductsBtn").addEventListener("click", async () => {
+      const file = document.getElementById("productUpload").files?.[0];
+      const adminCode = document.getElementById("adminCode").value.trim();
+      const status = document.getElementById("productUploadStatus");
+      if (!file) {
+        window.alert("请先选择洁融产品价格表 Excel");
+        return;
+      }
+      if (!adminCode) {
+        window.alert("请输入管理员口令");
+        return;
+      }
+      const form = new FormData();
+      form.append("file", file);
+      status.textContent = "正在上传...";
+      try {
+        const response = await fetch("/api/admin/products/upload", {
+          method: "POST",
+          headers: {
+            "x-access-code": accessCode,
+            "x-admin-code": adminCode
+          },
+          body: form
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || "上传失败");
+        catalog = [];
+        renderCatalog();
+        status.textContent = `已导入 ${data.count} 条产品`;
+      } catch (error) {
+        status.textContent = "上传失败";
+        window.alert(error.message);
+      }
+    });
+
+    document.getElementById("sealUpload").addEventListener("change", (event) => {
+      const file = event.target.files?.[0];
+      if (!file) return;
+      const adminCode = window.prompt("请输入管理员口令，用于保存电子章");
+      if (!adminCode) return;
+      const reader = new FileReader();
+      reader.onload = async () => {
+        sealImageData = String(reader.result || "");
+        try {
+          await api("/api/admin/seal", {
+            method: "POST",
+            headers: { "x-admin-code": adminCode },
+            json: { sealImageData }
+          });
+          render();
+          window.alert("电子章已保存");
+        } catch (error) {
+          window.alert(error.message);
+        }
+      };
+      reader.readAsDataURL(file);
+    });
+
+    ids.forEach((id) => {
+      fields[id].addEventListener("input", render);
+      fields[id].addEventListener("change", render);
+    });
+
+    function handleLineEdit(event) {
+      const target = event.target;
+      const index = Number(target.dataset.line);
+      const key = target.dataset.field;
+      if (!Number.isInteger(index) || !key) return;
+      if (key === "code") {
+        fillProduct(index, target.value);
+        return;
+      }
+      if (key === "priceMode") {
+        lines[index].priceMode = target.value;
+        lines[index].quotePrice = target.value === "special" ? "" : priceForMode(lines[index], target.value);
+        render();
+        return;
+      }
+      if (key === "quotePrice") {
+        lines[index].priceMode = "special";
+      }
+      lines[index][key] = key === "qty" || key === "quotePrice" ? target.value.replace(/[^\d.]/g, "") : target.value;
+      updateEditorRowTotal(index);
+      renderQuoteOutput();
+    }
+
+    linesBody.addEventListener("input", handleLineEdit);
+    linesBody.addEventListener("change", handleLineEdit);
+
+    linesBody.addEventListener("click", (event) => {
+      const removeIndex = event.target.dataset.remove;
+      if (removeIndex === undefined) return;
+      lines.splice(Number(removeIndex), 1);
+      if (!lines.length) lines.push(blankLine());
+      render();
+    });
+
+    async function init() {
+      try {
+        await ensureLogin();
+        await loadServerSeal();
+        renderCatalog();
+        if (!loadDraft()) {
+          await newQuote();
+        }
+        render();
+      } catch (error) {
+        document.body.innerHTML = `<main style="padding:32px;font-family:Arial,'Microsoft YaHei',sans-serif;"><h1>无法打开报价工作台</h1><p>${error.message}</p></main>`;
+      }
+    }
+
+    init();
+  </script>
+</body>
+</html>
